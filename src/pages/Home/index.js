@@ -13,7 +13,11 @@ import Modal from "../../containers/Modal";
 import { useData } from "../../contexts/DataContext";
 
 const Page = () => {
-  const { last } = useData();
+  const { data } = useData();
+  const lastTrie = data?.events?.sort((evt1, evt2) =>
+    new Date(evt1.date) > new Date(evt2.date) ? -1 : 1
+  );
+  const last = lastTrie?.[0];
 
   return (
     <>
