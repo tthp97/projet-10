@@ -1,24 +1,43 @@
 import { useEffect, useState } from "react";
 import { useData } from "../../contexts/DataContext";
 import { getMonth } from "../../helpers/Date";
-
 import "./style.scss";
 
 const Slider = () => {
   const { data } = useData();
   const [index, setIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const byDateDesc = data?.focus.sort((evtA, evtB) =>
     new Date(evtA.date) < new Date(evtB.date) ? -1 : 1
   );
-  const nextCard = () => {
-    setTimeout(
-      () => setIndex(index + 1 < byDateDesc?.length ? index + 1 : 0),
-      5000
-    );
+  // Fonction pour mettre en pause ou reprendre le slider
+  const togglePause = () => {
+    setIsPaused(!isPaused);
+  };
+  // Gestionnaire d'événements pour la barre d'espace
+  const handleKeyPress = (event) => {
+    if (event.keyCode === 32) {
+      event.preventDefault(); // Empêcher le comportement par défaut de la barre d'espace
+      togglePause(); // Mettre en pause ou reprendre le slider
+    }
   };
   useEffect(() => {
-    nextCard();
-  });
+    const timer = setTimeout(() => {
+      if (!isPaused) {
+        // Si le slider n'est pas en pause
+        setIndex((prevIndex) =>
+          prevIndex + 1 < byDateDesc?.length ? prevIndex + 1 : 0
+        );
+      }
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [index, isPaused, byDateDesc]);
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyPress);
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [isPaused]);
 
   return (
     <div className="SlideCardList">
